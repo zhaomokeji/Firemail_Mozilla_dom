@@ -1341,8 +1341,7 @@ void ContentChild::InitXPCOM(
 mozilla::ipc::IPCResult ContentChild::RecvRequestMemoryReport(
     const uint32_t& aGeneration, const bool& aAnonymize,
     const bool& aMinimizeMemoryUsage,
-    const Maybe<mozilla::ipc::FileDescriptor>& aDMDFile,
-    const RequestMemoryReportResolver& aResolver) {
+    const Maybe<mozilla::ipc::FileDescriptor>& aDMDFile) {
   nsCString process;
   if (aAnonymize || mRemoteType.IsEmpty()) {
     GetProcessName(process);
@@ -1357,7 +1356,9 @@ mozilla::ipc::IPCResult ContentChild::RecvRequestMemoryReport(
       [&](const MemoryReport& aReport) {
         Unused << GetSingleton()->SendAddMemoryReport(aReport);
       },
-      aResolver);
+      [&](const uint32_t& aGeneration) {
+        return GetSingleton()->SendFinishMemoryReport(aGeneration);
+      });
   return IPC_OK();
 }
 

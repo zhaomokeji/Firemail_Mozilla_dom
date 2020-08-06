@@ -164,8 +164,7 @@ mozilla::ipc::IPCResult RDDParent::RecvInitVideoBridge(
 
 mozilla::ipc::IPCResult RDDParent::RecvRequestMemoryReport(
     const uint32_t& aGeneration, const bool& aAnonymize,
-    const bool& aMinimizeMemoryUsage, const Maybe<FileDescriptor>& aDMDFile,
-    const RequestMemoryReportResolver& aResolver) {
+    const bool& aMinimizeMemoryUsage, const Maybe<FileDescriptor>& aDMDFile) {
   nsPrintfCString processName("RDD (pid %u)", (unsigned)getpid());
 
   mozilla::dom::MemoryReportRequestClient::Start(
@@ -173,7 +172,9 @@ mozilla::ipc::IPCResult RDDParent::RecvRequestMemoryReport(
       [&](const MemoryReport& aReport) {
         Unused << GetSingleton()->SendAddMemoryReport(aReport);
       },
-      aResolver);
+      [&](const uint32_t& aGeneration) {
+        return GetSingleton()->SendFinishMemoryReport(aGeneration);
+      });
   return IPC_OK();
 }
 

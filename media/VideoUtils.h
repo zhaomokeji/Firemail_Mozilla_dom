@@ -181,12 +181,12 @@ class AutoSetOnScopeExit {
 };
 
 enum class MediaThreadType {
-  CONTROLLER,  // MediaFormatReader, RemoteDecoderManager, MediaDecodeTask and
-               // others
+  PLAYBACK,          // MediaDecoderStateMachine and MediaFormatReader
   PLATFORM_DECODER,  // MediaDataDecoder
   PLATFORM_ENCODER,  // MediaDataEncoder
+  MTG_CONTROL,
   WEBRTC_DECODER,
-  MDSM,  // MediaDecoderStateMachine
+  MDSM,
 };
 // Returns the thread pool that is shared amongst all decoder state machines
 // for decoding streams.

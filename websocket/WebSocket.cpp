@@ -67,7 +67,6 @@
 #include "nsIWebSocketListener.h"
 #include "nsProxyRelease.h"
 #include "nsWeakReference.h"
-#include "nsIWebSocketImpl.h"
 
 #define OPEN_EVENT_STRING u"open"_ns
 #define MESSAGE_EVENT_STRING u"message"_ns
@@ -84,8 +83,7 @@ class WebSocketImpl final : public nsIInterfaceRequestor,
                             public nsIObserver,
                             public nsSupportsWeakReference,
                             public nsIRequest,
-                            public nsIEventTarget,
-                            public nsIWebSocketImpl {
+                            public nsIEventTarget {
  public:
   NS_DECL_NSIINTERFACEREQUESTOR
   NS_DECL_NSIWEBSOCKETLISTENER
@@ -93,7 +91,6 @@ class WebSocketImpl final : public nsIInterfaceRequestor,
   NS_DECL_NSIREQUEST
   NS_DECL_THREADSAFE_ISUPPORTS
   NS_DECL_NSIEVENTTARGET_FULL
-  NS_DECL_NSIWEBSOCKETIMPL
 
   explicit WebSocketImpl(WebSocket* aWebSocket)
       : mWebSocket(aWebSocket),
@@ -241,7 +238,7 @@ class WebSocketImpl final : public nsIInterfaceRequestor,
 
 NS_IMPL_ISUPPORTS(WebSocketImpl, nsIInterfaceRequestor, nsIWebSocketListener,
                   nsIObserver, nsISupportsWeakReference, nsIRequest,
-                  nsIEventTarget, nsIWebSocketImpl)
+                  nsIEventTarget)
 
 class CallDispatchConnectionCloseEvents final : public CancelableRunnable {
  public:
@@ -614,22 +611,6 @@ void WebSocketImpl::DisconnectInternal() {
       os->RemoveObserver(this, DOM_WINDOW_FROZEN_TOPIC);
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-// WebSocketImpl::nsIWebSocketImpl
-//-----------------------------------------------------------------------------
-
-NS_IMETHODIMP
-WebSocketImpl::SendMessage(const nsAString& aMessage) {
-  nsString message(aMessage);
-  nsCOMPtr<nsIRunnable> runnable = NS_NewRunnableFunction(
-      "WebSocketImpl::SendMessage",
-      [self = RefPtr<WebSocketImpl>(this), message = std::move(message)]() {
-        ErrorResult IgnoredErrorResult;
-        self->mWebSocket->Send(message, IgnoredErrorResult);
-      });
-  return Dispatch(runnable.forget(), NS_DISPATCH_NORMAL);
 }
 
 //-----------------------------------------------------------------------------
@@ -1774,10 +1755,6 @@ nsresult WebSocketImpl::InitializeConnection(
   NS_ENSURE_SUCCESS(rv, rv);
 
   mChannel = wsChannel;
-
-  if (mIsMainThread) {
-    mService->AssociateWebSocketImplWithSerialID(this, mChannel->Serial());
-  }
 
   if (mIsMainThread && doc) {
     mMainThreadEventTarget = doc->EventTargetFor(TaskCategory::Other);
