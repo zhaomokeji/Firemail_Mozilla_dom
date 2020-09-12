@@ -1839,7 +1839,7 @@ static void WatchRegKey(uint32_t aRoot, nsCOMPtr<nsIWindowsRegKey>& aKey) {
     return;
   }
   nsresult rv = aKey->Open(
-      aRoot, u"Software\\MozillaPlugins"_ns,
+      aRoot, u"Software\\ChunhuitechPlugins"_ns,
       nsIWindowsRegKey::ACCESS_READ | nsIWindowsRegKey::ACCESS_NOTIFY);
   if (NS_FAILED(rv)) {
     aKey = nullptr;

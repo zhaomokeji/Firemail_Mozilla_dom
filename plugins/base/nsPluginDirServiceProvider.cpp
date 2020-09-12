@@ -26,7 +26,7 @@ using namespace mozilla;
       do_CreateInstance("@mozilla.org/windows-registry-key;1");
   NS_ENSURE_TRUE(regKey, NS_ERROR_FAILURE);
 
-  nsresult rv = regKey->Open(aKey, u"Software\\MozillaPlugins"_ns,
+  nsresult rv = regKey->Open(aKey, u"Software\\ChunhuitechPlugins"_ns,
                              nsIWindowsRegKey::ACCESS_READ);
   if (NS_FAILED(rv)) {
     return rv;
